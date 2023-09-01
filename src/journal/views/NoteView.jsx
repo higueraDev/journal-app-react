@@ -1,8 +1,16 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { ImageGallery } from "../components/ImageGallery";
+import PropTypes from "prop-types";
+import { useForm } from "../../hooks";
+import { useSelector } from "react-redux";
+import { useMemo } from "react";
 
 export const NoteView = () => {
+	const { activeNote } = useSelector((state) => state.journal);
+	const { date, body, title,onInputChange } = useForm(activeNote);
+	const dateString = useMemo(() => new Date(date).toLocaleDateString(), [date])
+
 	return (
 		<Grid
 			container
@@ -13,7 +21,7 @@ export const NoteView = () => {
 		>
 			<Grid item>
 				<Typography fontSize={39} fontWeight="light">
-					August 24 ,2023
+					{dateString}
 				</Typography>
 			</Grid>
 			<Grid item>
@@ -24,17 +32,23 @@ export const NoteView = () => {
 			</Grid>
 			<Grid container>
 				<TextField
+					onChange={onInputChange}
 					type="text"
 					variant="filled"
 					placeholder="Type a cool title"
 					label="Title"
+					name="title"
+					value={title}
 					fullWidth
 					sx={{ mb: 1, border: "none" }}
 				/>
 				<TextField
+					onChange={onInputChange}
 					type="text"
 					variant="filled"
 					placeholder="What's going on?"
+					value={body}
+					name="body"
 					multiline
 					fullWidth
 					minRows={5}
@@ -45,4 +59,11 @@ export const NoteView = () => {
 			</Grid>
 		</Grid>
 	);
+};
+
+NoteView.propTypes = {
+	note: PropTypes.shape({
+		date: PropTypes.number,
+	}),
+	onInputChange: PropTypes.func,
 };

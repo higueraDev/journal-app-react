@@ -15,6 +15,7 @@ export const Home = () => {
 		(state) => state.journal
 	);
 	const dispatch = useDispatch();
+
 	const onLogout = () => {
 		dispatch(startLogout());
 	};
@@ -37,7 +38,8 @@ export const Home = () => {
 			data={notes}
 			onSidebarItemClick={onSidebarItemClick}
 		>
-			{activeNote ? <NoteView /> : <NothingSelectedView />}
+			{activeNote.id ? <NoteView /> : <NothingSelectedView />}
+			
 			<IconButton
 				disabled={isSaving}
 				onClick={onAddNote}
