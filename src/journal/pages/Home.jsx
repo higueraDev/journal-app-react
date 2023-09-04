@@ -5,21 +5,41 @@ import { NothingSelectedView } from "../views/NothingSelectedView";
 import { AddOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { startLogout } from "../../store/auth/thunks";
-import { startAddNote, startGetNotes } from "../../store/journal/thunks";
-import { useEffect } from "react";
+import {
+	startAddNote,
+	startGetNotes,
+	startSaveNote,
+} from "../../store/journal/thunks";
+import { useEffect, useMemo } from "react";
 import { setActiveNote } from "../../store/journal/journalSlice";
+import { useForm } from "../../hooks";
+import { launchAlert } from "../../helpers/launchAlert";
 
 export const Home = () => {
 	const { user } = useSelector((state) => state.auth);
+
 	const { isSaving, activeNote, notes } = useSelector(
 		(state) => state.journal
 	);
+
 	const dispatch = useDispatch();
+
+	const {
+		formState: activeNoteForm,
+		date,
+		onInputChange,
+	} = useForm(activeNote);
+
+	const dateString = useMemo(
+		() => new Date(date).toLocaleDateString(),
+		[date]
+	);
 
 	const onLogout = () => {
 		dispatch(startLogout());
 	};
-	const onAddNote = () => {
+
+	const onAddNote = async () => {
 		dispatch(startAddNote());
 	};
 
@@ -28,9 +48,21 @@ export const Home = () => {
 		dispatch(setActiveNote(note));
 	};
 
+	const onSaveNote = async () => {
+		dispatch(setActiveNote(activeNoteForm));
+		await dispatch(startSaveNote());
+		await dispatch(startGetNotes());
+		launchAlert(
+			"Note Updated",
+			"Your Changes has been saved successfully",
+			"success"
+		);
+	};
+
 	useEffect(() => {
 		dispatch(startGetNotes());
 	}, []);
+
 	return (
 		<JournalLayout
 			onLogout={onLogout}
@@ -38,8 +70,17 @@ export const Home = () => {
 			data={notes}
 			onSidebarItemClick={onSidebarItemClick}
 		>
-			{activeNote.id ? <NoteView /> : <NothingSelectedView />}
-			
+			{activeNote.date ? (
+				<NoteView
+					note={{ ...activeNoteForm, date: dateString }}
+					onInputChange={onInputChange}
+					onSaveNote={onSaveNote}
+					isSaving={isSaving}
+				/>
+			) : (
+				<NothingSelectedView />
+			)}
+
 			<IconButton
 				disabled={isSaving}
 				onClick={onAddNote}

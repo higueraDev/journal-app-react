@@ -2,15 +2,9 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { ImageGallery } from "../components/ImageGallery";
 import PropTypes from "prop-types";
-import { useForm } from "../../hooks";
-import { useSelector } from "react-redux";
-import { useMemo } from "react";
 
-export const NoteView = () => {
-	const { activeNote } = useSelector((state) => state.journal);
-	const { date, body, title,onInputChange } = useForm(activeNote);
-	const dateString = useMemo(() => new Date(date).toLocaleDateString(), [date])
-
+export const NoteView = ({ note, onInputChange, onSaveNote, isSaving }) => {
+	const { title, body, date } = note;
 	return (
 		<Grid
 			container
@@ -21,11 +15,16 @@ export const NoteView = () => {
 		>
 			<Grid item>
 				<Typography fontSize={39} fontWeight="light">
-					{dateString}
+					{date}
 				</Typography>
 			</Grid>
 			<Grid item>
-				<Button color="primary" padding={2}>
+				<Button
+					onClick={onSaveNote}
+					disabled={isSaving}
+					color="primary"
+					padding={2}
+				>
 					<SaveOutlined sx={{ fontSize: 30, mr: 1 }} />
 					Save
 				</Button>
@@ -63,7 +62,11 @@ export const NoteView = () => {
 
 NoteView.propTypes = {
 	note: PropTypes.shape({
-		date: PropTypes.number,
+		date: PropTypes.string,
+		title: PropTypes.string,
+		body: PropTypes.string,
 	}),
 	onInputChange: PropTypes.func,
+	onSaveNote: PropTypes.func,
+	isSaving: PropTypes.bool,
 };

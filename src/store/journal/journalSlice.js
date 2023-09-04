@@ -17,25 +17,13 @@ export const journalSlice = createSlice({
 		setIsSaving: (state, { payload }) => {
 			state.isSaving = payload;
 		},
-		addNote: (state, { payload }) => {
-			state.notes.push(payload);
-		},
 		setActiveNote: (state, { payload }) => {
 			state.activeNote = payload;
 		},
 		setNotes: (state, { payload }) => {
 			state.notes = payload;
 		},
-		updateNote: (state, { payload }) => {},
-		deleteNote: (state, { payload }) => {},
 	},
 });
 
-export const {
-	setIsSaving,
-	addNote,
-	deleteNote,
-	setActiveNote,
-	setNotes,
-	updateNote,
-} = journalSlice.actions;
+export const { setIsSaving, setActiveNote, setNotes } = journalSlice.actions;

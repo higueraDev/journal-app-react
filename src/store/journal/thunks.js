@@ -1,6 +1,7 @@
 import { collection, doc, getDocs, setDoc } from "firebase/firestore/lite";
 import { FirebaseDB } from "../../firebase/config";
-import { addNote, setActiveNote, setIsSaving, setNotes } from "./journalSlice";
+import { setActiveNote, setIsSaving, setNotes } from "./journalSlice";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const startAddNote = () => {
 	return async (dispatch, getState) => {
@@ -15,18 +16,19 @@ export const startAddNote = () => {
 		};
 
 		dispatch(setIsSaving(true));
+
 		const newDoc = doc(collection(FirebaseDB, `${user.uid}/journal/notes`));
 		await setDoc(newDoc, newNote);
-
 		newNote.id = newDoc.id;
-		dispatch(addNote(newNote));
 		dispatch(setActiveNote(newNote));
+		
 		dispatch(setIsSaving(false));
 	};
 };
 
-export const startGetNotes = () => {
-	return async (dispatch, getState) => {
+export const startGetNotes = createAsyncThunk(
+	"journal/startGetNotes",
+	async (params, { dispatch, getState }) => {
 		const { auth } = getState();
 		const { uid } = auth.user;
 
@@ -37,5 +39,37 @@ export const startGetNotes = () => {
 			notes.push({ id: doc.id, ...doc.data() });
 		});
 		dispatch(setNotes(notes));
-	};
-};
+
+		const result = {
+			success: true,
+			message: "Data fetched successfully",
+		};
+
+		return result;
+	}
+);
+
+export const startSaveNote = createAsyncThunk(
+	"journal/startSaveNote",
+	async (params, { dispatch, getState }) => {
+		const { auth } = getState();
+		const { user } = auth;
+		const { journal } = getState();
+		const { activeNote } = journal;
+		const { id } = activeNote;
+
+		dispatch(setIsSaving(true));
+
+		const docRef = doc(FirebaseDB, `${user.uid}/journal/notes/${id}`);
+		await setDoc(docRef, activeNote, { merge: true });
+
+		dispatch(setIsSaving(false));
+
+		const result = {
+			success: true,
+			message: "Updates saved successfully",
+		};
+
+		return result;
+	}
+);
